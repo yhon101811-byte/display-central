@@ -4,7 +4,7 @@ App interna de Display: CRM comercial, clientes, producción, cotizador, gastos 
 
 - **Página:** se publica con GitHub Pages desde este repositorio.
 - **Login y datos:** Firebase (Authentication con correo y contraseña + Firestore).
-- **Acceso:** solo los correos listados en `firestore.rules`. Quien abra la página sin cuenta solo ve la pantalla de inicio de sesión.
+- **Acceso:** con la clave del equipo (una sola cuenta de Firebase). Quien abra la página sin la clave solo ve la pantalla de entrada.
 - **Los datos de clientes no están en este repositorio**: viven en Firestore.
 
 ## Archivos

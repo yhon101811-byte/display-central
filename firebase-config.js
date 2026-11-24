@@ -1,6 +1,6 @@
 // Configuración web de Firebase (Consola de Firebase > Configuración del proyecto > Tus apps > Web).
-// Estos valores NO son secretos: identifican el proyecto. La protección real son el login
-// y las reglas de seguridad (archivo firestore.rules).
+// Estos valores NO son secretos: identifican el proyecto. La protección real es la clave
+// del equipo y las reglas de seguridad (archivo firestore.rules).
 window.FIREBASE_CONFIG = {
   apiKey: "PEGAR_AQUI",
   authDomain: "",
@@ -10,8 +10,6 @@ window.FIREBASE_CONFIG = {
   appId: ""
 };
 
-// Quién es quién: al entrar, la app pone el nombre automáticamente.
-window.DISPLAY_USUARIOS = {
-  // "correo-de-steven@ejemplo.com": "Steven",
-  // "correo-de-vanessa@ejemplo.com": "Vanessa",
-};
+// Cuenta única del equipo: la app solo pide la clave, no el correo.
+// Debe ser el mismo correo del usuario creado en Firebase > Authentication.
+window.DISPLAY_CORREO_EQUIPO = "";
