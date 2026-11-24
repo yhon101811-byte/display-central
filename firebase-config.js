@@ -12,4 +12,4 @@ window.FIREBASE_CONFIG = {
 
 // Cuenta única del equipo: la app solo pide la clave, no el correo.
 // Debe ser el mismo correo del usuario creado en Firebase > Authentication.
-window.DISPLAY_CORREO_EQUIPO = "";
+window.DISPLAY_CORREO_EQUIPO = "equipo@display-central-d2686.firebaseapp.com";

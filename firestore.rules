@@ -5,7 +5,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function autorizado() {
       return request.auth != null
-        && request.auth.token.email == 'CORREO_DEL_EQUIPO';
+        && request.auth.token.email == 'equipo@display-central-d2686.firebaseapp.com';
     }
     match /{coleccion}/{doc} {
       allow read, write: if autorizado()
