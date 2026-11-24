@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Display Central</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: barra lateral de módulos + área de trabajo; en celular la barra pasa abajo.
+   Los colores de módulo siguen las tintas de proceso (cian, magenta, amarillo, negro) de una imprenta. */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --surface-2:#f7f8fa; --line:#dde1e8; --fg:#161922; --muted:#5b6372;
+  --accent:#c4126b; --accent-soft:#fbe7f1; --accent-ink:#ffffff;
+  --cyan:#0b7fae; --cyan-soft:#e2f3fa; --yellow:#a87400; --yellow-soft:#fdf3d8;
+  --ok:#1d7f48; --ok-soft:#e1f4e8; --bad:#c03030; --bad-soft:#fbe5e5; --grey-soft:#eceef2;
+  --shadow:0 1px 2px rgba(20,24,35,.06),0 6px 20px rgba(20,24,35,.06);
+  --f-display:"Bricolage Grotesque","Inter",system-ui,sans-serif;
+  --f-text:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101218; --surface:#191c24; --surface-2:#1e222b; --line:#2c313c; --fg:#e7e9ee; --muted:#9aa1af;
+  --accent:#ff5aa5; --accent-soft:#3a1528; --accent-ink:#1a0610;
+  --cyan:#56c4f0; --cyan-soft:#10303d; --yellow:#f0bd4f; --yellow-soft:#3a2d0c;
+  --ok:#57d38b; --ok-soft:#0f3020; --bad:#ff7a7a; --bad-soft:#3c1515; --grey-soft:#252a33;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101218; --surface:#191c24; --surface-2:#1e222b; --line:#2c313c; --fg:#e7e9ee; --muted:#9aa1af;
+  --accent:#ff5aa5; --accent-soft:#3a1528; --accent-ink:#1a0610;
+  --cyan:#56c4f0; --cyan-soft:#10303d; --yellow:#f0bd4f; --yellow-soft:#3a2d0c;
+  --ok:#57d38b; --ok-soft:#0f3020; --bad:#ff7a7a; --bad-soft:#3c1515; --grey-soft:#252a33;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0} [hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.login{position:fixed;inset:0;z-index:60;background:var(--bg);display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.login form{width:min(380px,100%);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;display:grid;gap:14px;box-shadow:var(--shadow)}
+.login h1{font-size:26px}
+.login p{margin:0;color:var(--muted)}
+.login .err{color:var(--bad);font-size:13px;min-height:18px}
+.login .link{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:13px;justify-self:start}
+.navlink{border:0;background:none;color:var(--muted);cursor:pointer;padding:2px 0;text-align:left;font-size:12px;text-decoration:underline}
+.navlink:hover{color:var(--fg)}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-text);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100%}
+.nav{background:var(--surface);border-right:1px solid var(--line);padding:20px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;padding-left:max(12px,env(safe-area-inset-left,0px))}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px}
+.brand b{font-family:var(--f-display);font-size:18px}
+.inks{display:grid;grid-template-columns:repeat(2,8px);gap:3px}
+.inks i{width:8px;height:8px;border-radius:50%}
+.navbtn{display:flex;align-items:center;gap:10px;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer;text-align:left;color:var(--muted);font-weight:500}
+.navbtn svg{width:18px;height:18px;flex:none}
+.navbtn:hover{background:var(--surface-2);color:var(--fg)}
+.navbtn[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.navbtn .lbl-short{display:none}
+.nav-foot{margin-top:auto;padding:12px 8px 0;border-top:1px solid var(--line);display:grid;gap:6px;color:var(--muted);font-size:12px}
+.nav-foot select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+
+main{min-width:0;padding-block:22px 40px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font-size:26px;margin-right:auto}
+.top .sub{color:var(--muted);font-size:13px;width:100%;margin-top:-8px}
+.banner{padding:10px 14px;border-radius:var(--r);background:var(--yellow-soft);color:var(--fg);margin-bottom:16px;border:1px solid var(--line)}
+
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad)}
+.btn.danger.armed{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.toolbar .search{flex:1 1 220px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg .ct{font-size:12px;opacity:.75;margin-left:4px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:4px}
+.tile .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.tile .v{font-family:var(--f-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.tile .h{font-size:12px;color:var(--muted)}
+.tile.cyan .v{color:var(--cyan)} .tile.mag .v{color:var(--accent)} .tile.yel .v{color:var(--yellow)} .tile.bad .v{color:var(--bad)}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.panel h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.panel h3 .ct{font-family:var(--f-text);font-size:12px;color:var(--muted);font-weight:500}
+.rows{display:grid}
+.row{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);cursor:pointer;min-width:0}
+.row:first-child{border-top:0}
+.row .main{min-width:0;flex:1}
+.row .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row:hover .t{color:var(--accent)}
+.empty{color:var(--muted);padding:18px 4px;text-align:center}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--grey-soft);color:var(--muted)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.cyan{background:var(--cyan-soft);color:var(--cyan)} .pill.mag{background:var(--accent-soft);color:var(--accent)}
+.pill.yel{background:var(--yellow-soft);color:var(--yellow)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;flex:none;background:var(--cyan-soft);color:var(--cyan)}
+.av.V{background:var(--accent-soft);color:var(--accent)}
+
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+table.wide{min-width:1120px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;background:var(--surface-2);position:sticky;top:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+td .t{font-weight:600}
+td .s{font-size:12px;color:var(--muted)}
+td select.inl{border:1px solid transparent;background:transparent;border-radius:6px;padding:3px 4px;font-size:13px;font-weight:600;cursor:pointer}
+td select.inl:hover{border-color:var(--line);background:var(--surface)}
+.more{padding:10px;text-align:center;color:var(--muted);font-size:13px}
+
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
+.col{flex:0 0 250px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;max-height:calc(100vh - 210px)}
+.col.over{outline:2px dashed var(--accent);outline-offset:-2px}
+.col-h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-weight:600;border-bottom:1px solid var(--line)}
+.col-h .ct{color:var(--muted);font-weight:500;font-size:12px}
+.col-b{padding:8px;display:grid;gap:8px;overflow-y:auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;cursor:pointer;display:grid;gap:4px}
+.card:hover{border-color:var(--accent)}
+.card .t{font-weight:600;overflow-wrap:anywhere}
+.card .s{font-size:12px;color:var(--muted)}
+.card .f{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:2px}
+
+.bar{display:grid;grid-template-columns:130px minmax(0,1fr) 40px;gap:10px;align-items:center;padding:5px 0;font-size:13px}
+.bar .track{height:10px;background:var(--grey-soft);border-radius:99px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:99px}
+.bar .n{text-align:right;color:var(--muted)}
+
+/* Cotizador */
+.cot{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:14px;align-items:start}
+.cotlist{display:grid;gap:8px}
+.cotlist .card[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:16px}
+.result{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:2px;align-content:start}
+.result .ln{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.result .ln span:first-child{color:var(--muted)}
+.result .big{padding-top:12px;display:grid;gap:2px}
+.result .big b{font-family:var(--f-display);font-size:30px;color:var(--accent);font-variant-numeric:tabular-nums}
+.result .big small{color:var(--muted)}
+
+/* Formularios */
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.form .sec{grid-column:1/-1;font-family:var(--f-display);font-size:15px;font-weight:700;margin-top:6px;padding-top:10px;border-top:1px solid var(--line)}
+.form .sec:first-child{border-top:0;padding-top:0;margin-top:0}
+.fld{display:grid;gap:4px;min-width:0}
+.fld.w2{grid-column:1/-1}
+.fld>span{font-size:12px;color:var(--muted);font-weight:600}
+.fld input,.fld select,.fld textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.fld textarea{min-height:70px;resize:vertical}
+.fld input[type="checkbox"]{width:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;cursor:pointer;font-size:13px;background:var(--surface);user-select:none}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.addrow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.addrow input{flex:1 1 160px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+
+dialog{border:0;padding:0;border-radius:14px;background:var(--surface);color:var(--fg);width:min(760px,calc(100vw - 24px));max-height:calc(100vh - 32px);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(10,12,18,.45)}
+.dlg{display:flex;flex-direction:column;max-height:calc(100vh - 32px)}
+.dlg-h{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:20px;margin-right:auto;overflow-wrap:anywhere}
+.dlg-b{padding:18px 20px;overflow-y:auto;display:grid;gap:18px}
+.dlg-f{display:flex;gap:8px;padding:12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlg-f .sp{margin-right:auto}
+.x{border:0;background:none;cursor:pointer;font-size:22px;line-height:1;color:var(--muted);padding:4px 8px;border-radius:6px}
+.x:hover{background:var(--surface-2)}
+.log{display:grid;gap:8px}
+.log .it{padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:13px}
+.log .it small{color:var(--muted);display:block;font-size:11px}
+.minis{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:500;z-index:50;box-shadow:var(--shadow)}
+
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:fixed;inset:auto 0 0 0;top:auto;height:auto;flex-direction:row;justify-content:space-around;border-right:0;border-top:1px solid var(--line);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:20;gap:0}
+  .brand,.nav-foot{display:none}
+  .navbtn{flex-direction:column;gap:2px;font-size:10.5px;padding:6px 4px;flex:1;align-items:center}
+  .navbtn .lbl{display:none} .navbtn .lbl-short{display:block}
+  main{padding-bottom:90px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .top h1{font-size:22px}
+  .cot,.calc{grid-template-columns:minmax(0,1fr)}
+  .form{grid-template-columns:minmax(0,1fr)}
+  .mobile-yo{display:flex!important}
+  .col{max-height:none}
+}
+.mobile-yo{display:none;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.mobile-yo select{padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+@media (prefers-reduced-motion:no-preference){.card,.btn,.row{transition:border-color .15s,background .15s}}
+</style>
+</head>
+<body>
+
+<div class="login" id="login" hidden>
+  <form id="loginForm" novalidate>
+    <div class="brand" style="padding:0"><span class="inks" aria-hidden="true"><i style="background:var(--cyan)"></i><i style="background:var(--accent)"></i><i style="background:var(--yellow)"></i><i style="background:var(--fg)"></i></span><b>Display</b></div>
+    <h1>Entrar a Display Central</h1>
+    <p>Solo para el equipo de Display.</p>
+    <label class="fld"><span>Correo</span><input id="lgEmail" type="email" autocomplete="username" required></label>
+    <label class="fld"><span>Contraseña</span><input id="lgPass" type="password" autocomplete="current-password" required></label>
+    <div class="err" id="lgErr" role="alert"></div>
+    <button class="btn primary" id="lgBtn" type="submit" style="justify-content:center">Entrar</button>
+    <button class="link" id="lgReset" type="button">Olvidé mi contraseña</button>
+  </form>
+</div>
+<div class="app">
+  <nav class="nav" id="nav" aria-label="Módulos">
+    <div class="brand"><span class="inks" aria-hidden="true"><i style="background:var(--cyan)"></i><i style="background:var(--accent)"></i><i style="background:var(--yellow)"></i><i style="background:var(--fg)"></i></span><b>Display</b></div>
+    <div id="navItems" style="display:contents"></div>
+    <div class="nav-foot">
+      <label for="yo">Estoy trabajando como</label>
+      <select id="yo"><option>Steven</option><option>Vanessa</option></select>
+      <span id="whoami" style="overflow-wrap:anywhere"></span>
+      <button class="navlink" data-act="importar">Importar respaldo</button>
+      <button class="navlink" data-act="salir">Cerrar sesión</button>
+      <input type="file" id="impFile" accept="application/json,.json" hidden>
+    </div>
+  </nav>
+  <main>
+    <div class="top">
+      <h1 id="title">Inicio</h1>
+      <label class="mobile-yo">Soy <select id="yo2"><option>Steven</option><option>Vanessa</option></select></label>
+      <div id="actions" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <button class="btn sm mobile-yo" data-act="salir">Salir</button>
+    </div>
+    <div id="banner"></div>
+    <section id="view" aria-live="polite"></section>
+  </main>
+</div>
+<dialog id="dlg"><div class="dlg"><div class="dlg-h"><h2 id="dlgTitle"></h2><button class="x" id="dlgX" aria-label="Cerrar">×</button></div><div class="dlg-b" id="dlgBody"></div><div class="dlg-f" id="dlgFoot"></div></div></dialog>
+<div id="lists" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+/* ============================================================
+   DISPLAY CENTRAL — una sola app, varios módulos.
+   Para agregar un proceso nuevo: sumar una entrada en MODULES
+   (id, nombre, ícono, render) y, si guarda datos, su colección en COLS.
+   ============================================================ */
+const COLS = ['clientes','proyectos','proveedores','cotizaciones','gastos'];
+const L = {
+  estadosCRM:['Nuevo','Contactado','Conversación','Reunión agendada','Diagnóstico','Propuesta enviada','Negociación','Ganado','Perdido','Nurturing'],
+  responsables:['Steven','Vanessa'],
+  prioridades:['Alta','Media','Baja'],
+  origenes:['Prospección Instagram','Google Maps','Referido','Cliente antiguo','Cotización anterior','WhatsApp','Llamada','Networking','Web','Otro'],
+  servicios:['Marketing y estrategia','Redes sociales','Contenido','Meta Ads','Google Ads','Página web','Ecommerce','Branding','Diseño','Fotografía / video','Impresión / producción','Paquete integral','Otro'],
+  canales:['WhatsApp','Llamada','Instagram','Correo','Reunión','Referido','Otro'],
+  nichos:['Hotel','Restaurante','Odontología','Dermatología','Medicina estética','Veterinaria','Tienda de mascotas','Spa','Clínica','Tienda de ropa','Mallas','Joyería','Inmobiliaria','Arrendamientos','Constructora','Oftalmología','Tecnología','Detalles y regalos','Comida','Laboratorio','Carpintería','Ecommerce','B2B','Servicios profesionales','Otro'],
+  estadosProd:['Por comenzar','Planificación','En progreso','En pausa','Finalizado','Cancelado'],
+  facturado:['SI','NO','NO APLICA','PENDIENTE','REVISAR','OBSEQUIO'],
+  estadosCot:['Borrador','Enviada','Aceptada','Rechazada'],
+};
+const ABIERTOS = ['Por comenzar','Planificación','En progreso','En pausa'];
+const CERRADOS_CRM = ['Ganado','Perdido'];
+
+const S = {}; COLS.forEach(c => S[c] = new Map());
+const loaded = new Set();
+let db = null, dbState = 'connecting';
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COP = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+const money = v => (v === null || v === undefined || v === '' || isNaN(v)) ? '—' : COP.format(v);
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const addDays = (s,n) => { const d = new Date(s+'T12:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+const fdate = s => s ? new Date(s+'T12:00').toLocaleDateString('es-CO',{day:'numeric',month:'short',year: s.slice(0,4)===today().slice(0,4)?undefined:'numeric'}) : '—';
+const monthName = m => m ? new Date(m+'-15T12:00').toLocaleDateString('es-CO',{month:'long',year:'numeric'}) : '';
+const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const yo = () => $('#yo').value;
+const ls = { get(k,d){ try{ const v = localStorage.getItem('dc:'+k); return v ? JSON.parse(v) : d; }catch{ return d; } },
+             set(k,v){ try{ localStorage.setItem('dc:'+k, JSON.stringify(v)); }catch{} } };
+const list = c => [...S[c].entries()].map(([id,d]) => ({id, ...d}));
+const sum = (a,f) => a.reduce((t,x) => t + (Number(f(x))||0), 0);
+const initials = n => esc((n||'?').slice(0,1).toUpperCase());
+const opt = (arr, v, empty='—') => `<option value="">${esc(empty)}</option>` + arr.map(o => `<option ${o===v?'selected':''}>${esc(o)}</option>`).join('');
+const uid = () => (db ? db.collection('x').doc().id : 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+
+function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2600); }
+function errMsg(e){
+  const c = e && e.code;
+  if (c === 'permission-denied' || c === 'invalid_argument') return 'Tu usuario no tiene permiso para guardar. Revisa que tu correo esté autorizado.';
+  if (c === 'unavailable') return 'Sin conexión. Se guardará cuando vuelva el internet.';
+  if (c === 'quota_exceeded') return 'La base de datos está llena. Borra registros viejos para seguir.';
+  if (c === 'resource_exhausted') return 'Demasiados cambios seguidos. Espera unos segundos.';
+  return 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+}
+async function save(col, id, data){
+  if (!db) { toast('Inicia sesión para guardar.'); return false; }
+  data.actualizado = new Date().toISOString(); data.actualizadoPor = yo();
+  try { await db.collection(col).doc(id).set(data); return true; } catch(e){ toast(errMsg(e)); return false; }
+}
+async function patch(col, id, data){
+  if (!db) { toast('Inicia sesión para guardar.'); return false; }
+  data.actualizado = new Date().toISOString(); data.actualizadoPor = yo();
+  try { await db.collection(col).doc(id).update(data); return true; } catch(e){ toast(errMsg(e)); return false; }
+}
+async function remove(col, id){
+  if (!db) return false;
+  try { await db.collection(col).doc(id).delete(); return true; } catch(e){ toast(errMsg(e)); return false; }
+}
+
+/* ---------- datos derivados ---------- */
+function clientePorNombre(nombre){ const n = norm(nombre); return list('clientes').find(c => norm(c.empresa) === n); }
+async function asegurarCliente(nombre, extra={}){
+  nombre = (nombre||'').trim(); if (!nombre) return {id:'', empresa:''};
+  const c = clientePorNombre(nombre); if (c) return c;
+  const id = uid();
+  const doc = {empresa:nombre, estado:'Ganado', responsable:yo(), origen:'', fechaContacto:today(), bitacora:[], ...extra};
+  await save('clientes', id, doc); return {id, ...doc};
+}
+function proyectosDe(cid){ return list('proyectos').filter(p => p.clienteId === cid); }
+function provNombre(id){ return S.proveedores.get(id)?.nombre || id; }
+function estadoPill(e){
+  const m = {'Finalizado':'ok','Cancelado':'bad','En progreso':'cyan','En pausa':'yel','Por comenzar':'','Planificación':'',
+             'Ganado':'ok','Perdido':'bad','Propuesta enviada':'mag','Negociación':'mag','Reunión agendada':'cyan','Diagnóstico':'cyan','Conversación':'cyan','Nurturing':'yel',
+             'SI':'ok','NO':'bad','PENDIENTE':'yel','REVISAR':'yel','Aceptada':'ok','Rechazada':'bad','Enviada':'mag'};
+  return `<span class="pill ${m[e]||''}"><span class="dot"></span>${esc(e||'—')}</span>`;
+}
+function gestionBadge(c){
+  if (!c.proximaGestion || CERRADOS_CRM.includes(c.estado)) return '';
+  const t = today();
+  if (c.proximaGestion < t) return `<span class="pill bad">Vencida ${fdate(c.proximaGestion)}</span>`;
+  if (c.proximaGestion <= addDays(t,3)) return `<span class="pill yel">${fdate(c.proximaGestion)}</span>`;
+  return `<span class="pill">${fdate(c.proximaGestion)}</span>`;
+}
+function entregaBadge(p){
+  if (!p.fechaEntrega) return '<span class="s">Sin fecha</span>';
+  if (ABIERTOS.includes(p.estado) && p.fechaEntrega < today()) return `<span class="pill bad">Atrasado · ${fdate(p.fechaEntrega)}</span>`;
+  return `<span class="num">${fdate(p.fechaEntrega)}</span>`;
+}
+
+/* ---------- filtros (se recuerdan por persona) ---------- */
+const F = Object.assign({
+  cli:{q:'',resp:'',nicho:'',estado:'',vista:'tablero'},
+  prod:{grupo:'proceso',q:'',cliente:'',prov:'',mes:'',fact:''},
+  gas:{mes:today().slice(0,7),com:''},
+  prov:{q:''},
+  dir:{q:'',nicho:'',tipo:'todos'},
+  cot:{sel:''}
+}, ls.get('filtros', {}));
+const saveF = () => ls.set('filtros', F);
+
+/* ============================================================
+   MÓDULOS
+   ============================================================ */
+const ICON = {
+  inicio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  clientes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8.5V19l-4 1.5v-8z"/></svg>',
+  directorio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg>',
+  produccion:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>',
+  cotizador:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8 6.5h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18.5h2M12 18.5h4"/></svg>',
+  gastos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/><path d="M3 21h18"/></svg>',
+  proveedores:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 6h12v10h-12z"/><path d="M13.5 9.5h4.5l3 3.5v3h-7.5"/><circle cx="6" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg>',
+};
+const MODULES = [
+  {id:'inicio', label:'Inicio', short:'Inicio', render:vInicio},
+  {id:'clientes', label:'CRM comercial', short:'CRM', render:vClientes, action:()=>`<button class="btn primary" data-act="nuevoCliente">+ Nuevo prospecto</button>`},
+  {id:'produccion', label:'Producción', short:'Producción', render:vProduccion, action:()=>`<button class="btn primary" data-act="nuevoProyecto">+ Nuevo trabajo</button>`},
+  {id:'cotizador', label:'Cotizador', short:'Cotizar', render:vCotizador, action:()=>`<button class="btn primary" data-act="nuevaCot">+ Nueva cotización</button>`},
+  {id:'gastos', label:'Gastos de salidas', short:'Gastos', render:vGastos, action:()=>`<button class="btn primary" data-act="nuevoGasto">+ Registrar gasto</button>`},
+  {id:'proveedores', label:'Proveedores', short:'Proveedores', render:vProveedores, action:()=>`<button class="btn primary" data-act="nuevoProveedor">+ Nuevo proveedor</button>`},
+  {id:'directorio', label:'Clientes', short:'Clientes', render:vDirectorio, action:()=>`<button class="btn primary" data-act="nuevoClienteDir">+ Nuevo cliente</button>`},
+];
+let current = 'inicio';
+
+function waiting(){
+  if (dbState === 'none') return `<div class="panel empty">Falta configurar Firebase (archivo firebase-config.js).</div>`;
+  if (dbState === 'error') return `<div class="panel empty">No se pudo leer la información. Si acabas de entrar, revisa que tu correo esté autorizado en las reglas de Firebase.</div>`;
+  return `<div class="panel empty">Cargando la información…</div>`;
+}
+const ready = (...cols) => cols.every(c => loaded.has(c));
+
+/* ---------- INICIO ---------- */
+function vInicio(){
+  if (!ready('clientes','proyectos','gastos')) return waiting();
+  if (!S.clientes.size && !S.proyectos.size) return `<div class="panel empty" style="display:grid;gap:12px;justify-items:center"><b>La base de datos está vacía.</b><span>Carga el respaldo con toda la información (archivo respaldo-display-….json).</span><button class="btn primary" data-act="importar">Importar respaldo</button></div>`;
+  const t = today(), semana = addDays(t,7), mes = t.slice(0,7);
+  const P = list('proyectos'), C = list('clientes'), G = list('gastos');
+  const abiertos = P.filter(p => ABIERTOS.includes(p.estado));
+  const atrasados = abiertos.filter(p => p.fechaEntrega && p.fechaEntrega < t);
+  const proximas = abiertos.filter(p => p.fechaEntrega).sort((a,b) => a.fechaEntrega.localeCompare(b.fechaEntrega));
+  const entregadosMes = P.filter(p => p.estado === 'Finalizado' && (p.fechaEntrega||'').startsWith(mes));
+  const seg = C.filter(c => !CERRADOS_CRM.includes(c.estado) && c.proximaGestion && c.proximaGestion <= semana).sort((a,b) => a.proximaGestion.localeCompare(b.proximaGestion));
+  const gMes = sum(G.filter(g => (g.fecha||'').startsWith(mes)), g => g.total);
+  const pipeline = L.estadosCRM.map(e => [e, C.filter(c => c.estado === e).length]);
+  const max = Math.max(1, ...pipeline.map(x => x[1]));
+  const sinFact = P.filter(p => p.estado === 'Finalizado' && (p.facturado === 'NO' || p.facturado === 'PENDIENTE' || p.facturado === 'REVISAR'));
+  return `
+  <div class="tiles">
+    <div class="tile cyan"><span class="k">Trabajos en proceso</span><span class="v">${abiertos.length}</span><span class="h">${atrasados.length ? `${atrasados.length} con la entrega vencida` : 'Ninguno atrasado'}</span></div>
+    <div class="tile mag"><span class="k">Entregados en ${esc(monthName(mes).split(' ')[0])}</span><span class="v">${entregadosMes.length}</span><span class="h">${P.filter(p=>p.estado==='Finalizado').length} entregados en total</span></div>
+    <div class="tile ${seg.some(c=>c.proximaGestion<t)?'bad':'yel'}"><span class="k">Seguimientos esta semana</span><span class="v">${seg.length}</span><span class="h">${seg.filter(c=>c.proximaGestion<t).length} vencidos</span></div>
+    <div class="tile"><span class="k">Gastos de salidas del mes</span><span class="v num">${money(gMes)}</span><span class="h">${G.filter(g=>(g.fecha||'').startsWith(mes)).length} registros</span></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Próximas entregas <span class="ct">${abiertos.length} abiertas</span></h3>
+      <div class="rows">${proximas.slice(0,8).map(p => `
+        <div class="row" data-act="verProyecto" data-id="${esc(p.id)}"><div class="main"><div class="t">${esc(p.nombre)}</div><div class="s">${esc(p.clienteNombre)} · ${esc((p.proveedores||[]).map(provNombre).join(', ')||'Sin proveedor')}</div></div>${entregaBadge(p)}</div>`).join('') || `<div class="empty">No hay trabajos abiertos con fecha de entrega.</div>`}</div>
+    </div>
+    <div class="panel"><h3>Seguimientos pendientes <span class="ct">próximos 7 días</span></h3>
+      <div class="rows">${seg.slice(0,8).map(c => `
+        <div class="row" data-act="verCliente" data-id="${esc(c.id)}"><span class="av ${esc((c.responsable||'')[0]||'')}">${initials(c.responsable)}</span><div class="main"><div class="t">${esc(c.empresa)}</div><div class="s">${esc(c.proximaAccion || c.estado)}</div></div>${gestionBadge(c)}</div>`).join('') || `<div class="empty">Nada agendado. Pon una "próxima gestión" a tus prospectos y aparecerán aquí.</div>`}</div>
+    </div>
+    <div class="panel"><h3>Embudo comercial <span class="ct">${C.length} clientes y prospectos</span></h3>
+      ${pipeline.map(([e,n]) => `<div class="bar"><span>${esc(e)}</span><span class="track"><span class="fill" style="width:${(n/max*100).toFixed(1)}%"></span></span><span class="n num">${n}</span></div>`).join('')}
+    </div>
+    <div class="panel"><h3>Entregados sin facturar <span class="ct">${sinFact.length}</span></h3>
+      <div class="rows">${sinFact.slice(0,8).map(p => `
+        <div class="row" data-act="verProyecto" data-id="${esc(p.id)}"><div class="main"><div class="t">${esc(p.nombre)}</div><div class="s">${esc(p.clienteNombre)} · entregado ${fdate(p.fechaEntrega)}</div></div>${estadoPill(p.facturado)}</div>`).join('') || `<div class="empty">Todo lo entregado está facturado.</div>`}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- CLIENTES / CRM ---------- */
+function filtrarClientes(){
+  const f = F.cli, q = norm(f.q);
+  return list('clientes').filter(c =>
+    (!q || norm([c.empresa,c.contacto,c.celular,c.correo,c.nicho,c.ciudad].join(' ')).includes(q)) &&
+    (!f.resp || c.responsable === f.resp) && (!f.nicho || c.nicho === f.nicho) && (!f.estado || c.estado === f.estado));
+}
+function vClientes(){
+  if (!ready('clientes')) return waiting();
+  const f = F.cli, C = filtrarClientes();
+  const nichos = [...new Set([...L.nichos, ...list('clientes').map(c=>c.nicho).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,'es'));
+  const tb = `<div class="toolbar">
+    <input class="search" id="cliQ" type="search" placeholder="Buscar empresa, contacto, celular…" value="${esc(f.q)}" data-f="cli.q">
+    <select id="cliResp" data-f="cli.resp">${opt(L.responsables, f.resp, 'Responsable: todos')}</select>
+    <select id="cliNicho" data-f="cli.nicho">${opt(nichos, f.nicho, 'Nicho: todos')}</select>
+    ${f.vista==='lista' ? `<select id="cliEstado" data-f="cli.estado">${opt(L.estadosCRM, f.estado, 'Estado: todos')}</select>` : ''}
+    <span class="seg" role="group" aria-label="Vista"><button data-act="vista" data-v="tablero" aria-pressed="${f.vista==='tablero'}">Tablero</button><button data-act="vista" data-v="lista" aria-pressed="${f.vista==='lista'}">Lista</button></span>
+  </div>`;
+  if (!S.clientes.size) return tb + `<div class="panel empty">Aún no hay clientes. Crea el primero con “+ Nuevo cliente”.</div>`;
+  if (f.vista === 'lista') {
+    const rows = C.sort((a,b) => (a.empresa||'').localeCompare(b.empresa||'','es'));
+    return tb + `<div class="tablewrap"><table><thead><tr><th>Empresa</th><th>Nicho</th><th>Estado</th><th>Resp.</th><th>Próxima gestión</th><th>Celular</th><th class="r">Trabajos</th></tr></thead><tbody>
+      ${rows.slice(0,400).map(c => { const n = proyectosDe(c.id).length; return `<tr data-act="verCliente" data-id="${esc(c.id)}">
+        <td><div class="t">${esc(c.empresa)}</div><div class="s">${esc(c.contacto||'')}</div></td><td>${esc(c.nicho||'—')}</td><td>${estadoPill(c.estado)}</td>
+        <td>${c.responsable?`<span class="av ${esc(c.responsable[0])}" title="${esc(c.responsable)}">${initials(c.responsable)}</span>`:'—'}</td>
+        <td>${gestionBadge(c) || '<span class="s">—</span>'}</td><td class="num">${esc(c.celular||'—')}</td><td class="r num">${n||'—'}</td></tr>`; }).join('')}
+      </tbody></table>${rows.length>400?`<div class="more">Mostrando 400 de ${rows.length}. Usa la búsqueda para encontrar el resto.</div>`:''}${!rows.length?`<div class="empty">Ningún cliente coincide con los filtros.</div>`:''}</div>`;
+  }
+  const LIM = 60;
+  return tb + `<div class="board">${L.estadosCRM.map(e => {
+    const cs = C.filter(c => (c.estado||'Nuevo') === e).sort((a,b) => (a.proximaGestion||'9').localeCompare(b.proximaGestion||'9') || (a.empresa||'').localeCompare(b.empresa||'','es'));
+    return `<div class="col" data-drop="${esc(e)}"><div class="col-h"><span>${esc(e)}</span><span class="ct num">${cs.length}</span></div><div class="col-b">
+      ${cs.slice(0,LIM).map(c => `<div class="card" draggable="true" data-act="verCliente" data-id="${esc(c.id)}">
+        <div class="t">${esc(c.empresa)}</div><div class="s">${esc([c.contacto,c.nicho].filter(Boolean).join(' · ') || 'Sin datos de contacto')}</div>
+        <div class="f">${c.responsable?`<span class="av ${esc(c.responsable[0])}" title="${esc(c.responsable)}">${initials(c.responsable)}</span>`:'<span></span>'}${gestionBadge(c)}</div></div>`).join('')}
+      ${cs.length>LIM?`<div class="more">+${cs.length-LIM} más. Usa la búsqueda o la vista Lista.</div>`:''}</div></div>`;
+  }).join('')}</div>`;
+}
+
+const CLI_FIELDS = [
+  {sec:'Datos de la empresa'},
+  {k:'empresa',l:'Empresa o cliente',req:true},{k:'contacto',l:'Contacto'},{k:'cargo',l:'Cargo'},{k:'celular',l:'Celular',t:'tel'},
+  {k:'correo',l:'Correo',t:'email'},{k:'ciudad',l:'Ciudad'},{k:'nicho',l:'Nicho',t:'combo',list:'dl-nichos'},{k:'origen',l:'Origen del prospecto',t:'select',o:L.origenes},
+  {k:'instagram',l:'Instagram'},{k:'web',l:'Página web'},
+  {sec:'Gestión comercial'},
+  {k:'responsable',l:'Responsable',t:'select',o:L.responsables},{k:'estado',l:'Estado comercial',t:'select',o:L.estadosCRM},
+  {k:'prioridad',l:'Prioridad',t:'select',o:L.prioridades},{k:'servicio',l:'Servicio potencial',t:'select',o:L.servicios},
+  {k:'problema',l:'Problema u oportunidad detectada',t:'area',w:'w2'},{k:'oferta',l:'Oferta sugerida',w:'w2'},
+  {k:'fechaContacto',l:'Fecha de primer contacto',t:'date'},{k:'ultimaGestion',l:'Última gestión',t:'date'},
+  {k:'proximaGestion',l:'Próxima gestión (fecha)',t:'date'},{k:'canal',l:'Canal del último contacto',t:'select',o:L.canales},
+  {k:'proximaAccion',l:'Qué hay que hacer en la próxima gestión',w:'w2'},
+  {sec:'Cierre'},
+  {k:'fechaCierre',l:'Fecha de cierre',t:'date'},{k:'valorVendido',l:'Valor vendido (COP)',t:'money'},
+  {k:'margen',l:'Margen estimado %',t:'number'},{k:'motivoPerdida',l:'Motivo de pérdida'},
+  {k:'notas',l:'Notas',t:'area',w:'w2'},
+];
+
+/* ---------- PRODUCCIÓN ---------- */
+function grupoDe(p){ return p.estado === 'Finalizado' ? 'entregados' : p.estado === 'Cancelado' ? 'cancelados' : 'proceso'; }
+function filtrarProd(ignorarGrupo){
+  const f = F.prod, q = norm(f.q);
+  return list('proyectos').filter(p =>
+    (ignorarGrupo || f.grupo === 'todos' || grupoDe(p) === f.grupo) &&
+    (!q || norm([p.nombre,p.clienteNombre,p.oc,p.factura,p.notas,p.recibe,p.entrega].join(' ')).includes(q)) &&
+    (!f.cliente || p.clienteId === f.cliente) && (!f.prov || (p.proveedores||[]).includes(f.prov)) &&
+    (!f.mes || (p.fechaEntrega||'').startsWith(f.mes)) && (!f.fact || p.facturado === f.fact));
+}
+function vProduccion(){
+  if (!ready('proyectos','proveedores')) return waiting();
+  const f = F.prod, base = filtrarProd(true);
+  const ct = g => base.filter(p => g === 'todos' || grupoDe(p) === g).length;
+  const rows = filtrarProd(false).sort((a,b) => f.grupo === 'proceso' ? (a.fechaEntrega||'9').localeCompare(b.fechaEntrega||'9') : (b.fechaEntrega||'').localeCompare(a.fechaEntrega||''));
+  const cuenta = {}; list('proyectos').forEach(p => { if (p.clienteId) cuenta[p.clienteId] = (cuenta[p.clienteId]||0)+1; });
+  const cliOpts = Object.keys(cuenta).map(id => [id, S.clientes.get(id)?.empresa || list('proyectos').find(p=>p.clienteId===id)?.clienteNombre || id]).sort((a,b)=>a[1].localeCompare(b[1],'es'));
+  const provs = list('proveedores').sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
+  const resumen = (f.cliente || f.prov || f.mes || f.q || f.fact) ? `<div class="minis">
+      <span class="pill ok">${ct('entregados')} entregados</span><span class="pill cyan">${ct('proceso')} en proceso</span>${ct('cancelados')?`<span class="pill bad">${ct('cancelados')} cancelados</span>`:''}
+      ${f.cliente?`<span class="pill">Cliente: ${esc(S.clientes.get(f.cliente)?.empresa||'')}</span>`:''}${f.prov?`<span class="pill">Proveedor: ${esc(provNombre(f.prov))}</span>`:''}${f.mes?`<span class="pill">Entrega en ${esc(monthName(f.mes))}</span>`:''}
+      <button class="btn sm" data-act="limpiarProd">Quitar filtros</button></div>` : '';
+  return `<div class="toolbar">
+      <span class="seg" role="group" aria-label="Grupo">${[['proceso','En proceso'],['entregados','Entregados'],['cancelados','Cancelados'],['todos','Todos']].map(([g,l]) => `<button data-act="grupo" data-v="${g}" aria-pressed="${f.grupo===g}">${l}<span class="ct num">${ct(g)}</span></button>`).join('')}</span>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="prodQ" type="search" placeholder="Buscar trabajo, OC, factura, notas…" value="${esc(f.q)}" data-f="prod.q">
+      <select id="prodCli" data-f="prod.cliente"><option value="">Cliente: todos</option>${cliOpts.map(([id,n]) => `<option value="${esc(id)}" ${id===f.cliente?'selected':''}>${esc(n)} (${cuenta[id]})</option>`).join('')}</select>
+      <select id="prodProv" data-f="prod.prov"><option value="">Proveedor: todos</option>${provs.map(p => `<option value="${esc(p.id)}" ${p.id===f.prov?'selected':''}>${esc(p.nombre)}</option>`).join('')}</select>
+      <input id="prodMes" type="month" value="${esc(f.mes)}" data-f="prod.mes" aria-label="Mes de entrega" title="Mes de entrega">
+      <select id="prodFact" data-f="prod.fact">${opt(L.facturado, f.fact, 'Facturado: todos')}</select>
+    </div>${resumen}
+    <div class="tablewrap"><table class="wide"><thead><tr><th>Trabajo</th><th>Estado</th><th>Fecha entrega</th><th>Proveedores</th><th>Quién entrega → recibe</th><th>Dirección de entrega</th><th>Facturado</th><th>N.º factura</th><th>OC</th></tr></thead><tbody>
+    ${rows.slice(0,300).map(p => `<tr data-act="verProyecto" data-id="${esc(p.id)}">
+      <td><div class="t">${esc(p.nombre)}</div><div class="s">${esc(p.clienteNombre||'Sin cliente')}</div></td>
+      <td><select class="inl" data-act="estadoProd" data-id="${esc(p.id)}" aria-label="Estado de ${esc(p.nombre)}">${L.estadosProd.map(e=>`<option ${e===p.estado?'selected':''}>${esc(e)}</option>`).join('')}</select></td>
+      <td>${entregaBadge(p)}</td>
+      <td><div class="s" style="color:var(--fg)">${esc((p.proveedores||[]).map(provNombre).join(', ') || '—')}</div></td>
+      <td><div class="s">${esc(p.entrega||'—')} → ${esc(p.recibe||'—')}</div></td>
+      <td><div class="s" style="color:var(--fg);max-width:220px">${esc(p.direccion||'Por confirmar')}</div></td>
+      <td>${p.facturado?estadoPill(p.facturado):'<span class="s">—</span>'}</td><td class="num">${esc(p.factura||'—')}</td><td class="num">${esc(p.oc||'—')}</td></tr>`).join('')}
+    </tbody></table>${!rows.length?`<div class="empty">No hay trabajos con estos filtros.</div>`:''}${rows.length>300?`<div class="more">Mostrando 300 de ${rows.length}. Filtra por mes o cliente para ver el resto.</div>`:''}</div>`;
+}
+const PROY_FIELDS = [
+  {sec:'Trabajo'},
+  {k:'nombre',l:'Nombre del trabajo',req:true,w:'w2'},
+  {k:'clienteNombre',l:'Cliente',t:'combo',list:'dl-clientes',req:true},{k:'contacto',l:'Contacto del cliente'},
+  {k:'estado',l:'Estado',t:'select',o:L.estadosProd},{k:'facturado',l:'Facturado',t:'select',o:L.facturado},
+  {k:'fechaInicio',l:'Fecha de inicio',t:'date'},{k:'fechaEntrega',l:'Fecha de entrega',t:'date'},
+  {k:'oc',l:'Orden de compra'},{k:'factura',l:'Número de factura'},{k:'valor',l:'Valor (COP)',t:'money'},
+  {sec:'Proveedores y entrega'},
+  {k:'proveedores',t:'provs',w:'w2'},
+  {k:'entrega',l:'Quién entrega',t:'combo',list:'dl-entrega'},{k:'recibe',l:'Quién recibe'},
+  {k:'direccion',l:'Dirección de entrega',w:'w2'},
+  {k:'notas',l:'Notas',t:'area',w:'w2'},
+];
+
+/* ---------- COTIZADOR ---------- */
+let cotDraft = null;
+function cotNueva(preset={}){ return {id:'', trabajo:'', clienteNombre:'', clienteId:'', cantidad:1, costoProveedor:0, envio:0, parqueadero:0, otros:0, utilidad:0.4, comision:0, iva:0.19, estado:'Borrador', notas:'', fecha:today(), proyectoId:'', ...preset}; }
+function calc(c){
+  const costo = (+c.costoProveedor||0)+(+c.envio||0)+(+c.parqueadero||0)+(+c.otros||0);
+  const u = Math.min(Math.max(+c.utilidad||0,0),0.95);
+  const conUtil = costo/(1-u);
+  const antesIva = conUtil + (+c.comision||0);
+  const iva = antesIva*(+c.iva||0);
+  const total = antesIva + iva;
+  return {costo, conUtil, ganancia:conUtil-costo, antesIva, iva, total, unit: (+c.cantidad>0? antesIva/(+c.cantidad):0)};
+}
+function vCotizador(){
+  if (!ready('cotizaciones','clientes')) return waiting();
+  const cs = list('cotizaciones').sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if (!cotDraft) { const s = F.cot.sel && S.cotizaciones.get(F.cot.sel); cotDraft = s ? {id:F.cot.sel, ...s} : cotNueva(); }
+  const d = cotDraft;
+  const inp = (k,l,attrs='') => `<label class="fld"><span>${l}</span><input id="cot_${k}" data-cot="${k}" value="${esc(d[k] ?? '')}" ${attrs}></label>`;
+  return `<div class="cot">
+    <div class="cotlist">
+      ${cs.map(c => { const r = calc(c); return `<div class="card" data-act="abrirCot" data-id="${esc(c.id)}" aria-current="${c.id===d.id}">
+        <div class="t">${esc(c.trabajo||'Sin nombre')}</div><div class="s">${esc(c.clienteNombre||'Sin cliente')} · ${fdate(c.fecha)}</div>
+        <div class="f"><b class="num">${money(r.total)}</b>${estadoPill(c.estado)}</div></div>`; }).join('') || `<div class="panel empty">Las cotizaciones que guardes quedan aquí, ligadas al cliente.</div>`}
+    </div>
+    <div class="panel">
+      <h3>${d.id ? 'Editar cotización' : 'Nueva cotización'}</h3>
+      <div class="calc">
+        <div class="form">
+          ${inp('trabajo','Trabajo')}
+          <label class="fld"><span>Cliente</span><input id="cot_clienteNombre" data-cot="clienteNombre" list="dl-clientes" value="${esc(d.clienteNombre)}"></label>
+          ${inp('cantidad','Cantidad','type="number" min="0" step="1" inputmode="numeric"')}
+          ${inp('costoProveedor','Costo de proveedor (neto antes de IVA)','type="number" min="0" step="100" inputmode="numeric"')}
+          ${inp('envio','Envío (socio o taxi)','type="number" min="0" step="100" inputmode="numeric"')}
+          ${inp('parqueadero','Parqueadero','type="number" min="0" step="100" inputmode="numeric"')}
+          ${inp('otros','Almuerzo u otros','type="number" min="0" step="100" inputmode="numeric"')}
+          <label class="fld"><span>% de utilidad neta</span><input id="cot_utilidadPct" data-cot="utilidadPct" type="number" min="0" max="95" step="1" value="${Math.round((+d.utilidad||0)*100)}"></label>
+          ${inp('comision','Comisión (COP, antes de IVA)','type="number" min="0" step="100" inputmode="numeric"')}
+          <label class="fld"><span>IVA %</span><input id="cot_ivaPct" data-cot="ivaPct" type="number" min="0" max="100" step="1" value="${Math.round((+d.iva||0)*100)}"></label>
+          <label class="fld"><span>Estado</span><select id="cot_estado" data-cot="estado">${L.estadosCot.map(e=>`<option ${e===d.estado?'selected':''}>${e}</option>`).join('')}</select></label>
+          <label class="fld"><span>Fecha</span><input id="cot_fecha" data-cot="fecha" type="date" value="${esc(d.fecha)}"></label>
+          <label class="fld w2"><span>Notas</span><textarea id="cot_notas" data-cot="notas">${esc(d.notas)}</textarea></label>
+        </div>
+        <div class="result" id="cotRes">${cotResultado(d)}</div>
+      </div>
+      <div class="dlg-f" style="padding:14px 0 0;border:0">
+        ${d.id?`<button class="btn danger sp" data-act="borrarCot">Eliminar</button>`:'<span class="sp"></span>'}
+        ${d.proyectoId?`<button class="btn" data-act="verProyecto" data-id="${esc(d.proyectoId)}">Ver trabajo creado</button>`:`<button class="btn" data-act="cotAProyecto">Convertir en trabajo</button>`}
+        <button class="btn primary" data-act="guardarCot">Guardar cotización</button>
+      </div>
+    </div></div>`;
+}
+function cotResultado(d){
+  const r = calc(d);
+  return `<div class="ln"><span>Total costo</span><span>${money(r.costo)}</span></div>
+    <div class="ln"><span>Valor con utilidad</span><span>${money(r.conUtil)}</span></div>
+    <div class="ln"><span>Ganancia Display</span><span>${money(r.ganancia)}</span></div>
+    <div class="ln"><span>Comisión</span><span>${money(+d.comision||0)}</span></div>
+    <div class="ln"><span>Subtotal antes de IVA</span><span>${money(r.antesIva)}</span></div>
+    <div class="ln"><span>IVA ${Math.round((+d.iva||0)*100)} %</span><span>${money(r.iva)}</span></div>
+    <div class="big"><small>Valor factura</small><b>${money(r.total)}</b><small>${+d.cantidad>0?`${money(r.unit)} por unidad antes de IVA (${esc(d.cantidad)} u.)`:''}</small></div>`;
+}
+
+/* ---------- GASTOS ---------- */
+function vGastos(){
+  if (!ready('gastos')) return waiting();
+  const f = F.gas;
+  const G = list('gastos').filter(g => (!f.mes || (g.fecha||'').startsWith(f.mes)) && (!f.com || g.comercial === f.com)).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const delMes = list('gastos').filter(g => !f.mes || (g.fecha||'').startsWith(f.mes));
+  const porCliente = {}; G.forEach(g => porCliente[g.cliente||'Sin cliente'] = (porCliente[g.cliente||'Sin cliente']||0) + (+g.total||0));
+  const top = Object.entries(porCliente).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  return `<div class="toolbar">
+      <input id="gasMes" type="month" value="${esc(f.mes)}" data-f="gas.mes" aria-label="Mes">
+      <button class="btn sm" data-act="gasTodo">${f.mes?'Ver todos los meses':'Solo este mes'}</button>
+      <select id="gasCom" data-f="gas.com">${opt(L.responsables, f.com, 'Comercial: ambos')}</select>
+    </div>
+    <div class="tiles">
+      <div class="tile mag"><span class="k">Total ${f.mes?esc(monthName(f.mes)):'histórico'}</span><span class="v num">${money(sum(G,g=>g.total))}</span><span class="h">${G.length} salidas</span></div>
+      ${L.responsables.map(r => `<div class="tile ${r==='Steven'?'cyan':'yel'}"><span class="k">${r}</span><span class="v num">${money(sum(delMes.filter(g=>g.comercial===r),g=>g.total))}</span><span class="h">${sum(delMes.filter(g=>g.comercial===r),g=>g.kms)} km recorridos</span></div>`).join('')}
+      <div class="tile"><span class="k">Cliente con más gasto</span><span class="v" style="font-size:18px">${esc(top[0]?.[0]||'—')}</span><span class="h num">${top[0]?money(top[0][1]):''}</span></div>
+    </div>
+    <div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Cliente y motivo</th><th>Quién</th><th>Recorrido</th><th class="r">Gasolina</th><th class="r">Peajes</th><th class="r">Parq.</th><th class="r">Almuerzo</th><th class="r">Varios</th><th class="r">Total</th></tr></thead><tbody>
+      ${G.map(g => `<tr data-act="verGasto" data-id="${esc(g.id)}"><td class="num">${fdate(g.fecha)}</td><td><div class="t">${esc(g.cliente||'—')}</div><div class="s">${esc(g.motivo||'')}</div></td>
+        <td><span class="av ${esc((g.comercial||'')[0]||'')}" title="${esc(g.comercial)}">${initials(g.comercial)}</span></td><td><div class="s">${esc([g.origen,g.destino].filter(Boolean).join(' → ')||'—')}${g.kms?` · ${esc(g.kms)} km`:''}</div></td>
+        ${['gasolina','peajes','parqueadero','almuerzo','varios'].map(k=>`<td class="r num">${g[k]?money(g[k]):'—'}</td>`).join('')}<td class="r num"><b>${money(g.total)}</b></td></tr>`).join('')}
+    </tbody></table>${!G.length?`<div class="empty">No hay gastos registrados ${f.mes?'en '+esc(monthName(f.mes)):''}.</div>`:''}</div>`;
+}
+const GAS_FIELDS = [
+  {k:'fecha',l:'Fecha',t:'date',req:true},{k:'comercial',l:'Quién salió',t:'select',o:L.responsables,req:true},
+  {k:'cliente',l:'Cliente',t:'combo',list:'dl-clientes'},{k:'motivo',l:'Motivo de la salida'},
+  {k:'origen',l:'Origen (A)'},{k:'destino',l:'Destino (B)'},{k:'kms',l:'Kilómetros',t:'number'},
+  {k:'gasolina',l:'Gasolina',t:'money'},{k:'peajes',l:'Peajes',t:'money'},{k:'parqueadero',l:'Parqueadero',t:'money'},
+  {k:'almuerzo',l:'Almuerzo',t:'money'},{k:'varios',l:'Varios',t:'money'},
+  {k:'observaciones',l:'Observaciones',t:'area',w:'w2'},
+];
+
+/* ---------- CLIENTES (directorio) ---------- */
+function vDirectorio(){
+  if (!ready('clientes','proyectos')) return waiting();
+  const f = F.dir, q = norm(f.q), P = list('proyectos');
+  const stats = {}; P.forEach(p => { const s = stats[p.clienteId] ||= {n:0, ent:0, pro:0, ult:''}; s.n++; if (p.estado==='Finalizado') s.ent++; if (ABIERTOS.includes(p.estado)) s.pro++; if ((p.fechaEntrega||'') > s.ult) s.ult = p.fechaEntrega; });
+  const all = list('clientes').map(c => ({...c, st: stats[c.id] || {n:0,ent:0,pro:0,ult:''}}));
+  const esCliente = c => c.st.n > 0 || c.estado === 'Ganado';
+  const ct = {todos: all.length, clientes: all.filter(esCliente).length, prospectos: all.filter(c => !esCliente(c)).length};
+  const nichos = [...new Set(all.map(c=>c.nicho).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+  const rows = all.filter(c => (f.tipo==='todos' || (f.tipo==='clientes') === esCliente(c)) && (!f.nicho || c.nicho === f.nicho) &&
+      (!q || norm([c.empresa,c.contacto,c.celular,c.correo,c.ciudad,c.nicho].join(' ')).includes(q)))
+    .sort((a,b) => (a.empresa||'').localeCompare(b.empresa||'','es'));
+  return `<div class="toolbar">
+      <span class="seg" role="group" aria-label="Tipo">${[['todos','Todos'],['clientes','Clientes'],['prospectos','Prospectos']].map(([k,l]) => `<button data-act="dirTipo" data-v="${k}" aria-pressed="${f.tipo===k}">${l}<span class="ct num">${ct[k]}</span></button>`).join('')}</span>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="dirQ" type="search" placeholder="Buscar empresa, contacto, celular, correo…" value="${esc(f.q)}" data-f="dir.q">
+      <select id="dirNicho" data-f="dir.nicho">${opt(nichos, f.nicho, 'Nicho: todos')}</select>
+    </div>
+    <div class="tablewrap"><table class="wide"><thead><tr><th>Cliente</th><th>Celular</th><th>Correo</th><th>Ciudad</th><th>Nicho</th><th>Estado</th><th class="r">Entregados</th><th class="r">En proceso</th><th>Último trabajo</th></tr></thead><tbody>
+    ${rows.slice(0,400).map(c => `<tr data-act="verCliente" data-id="${esc(c.id)}">
+      <td><div class="t">${esc(c.empresa)}</div><div class="s">${esc(c.contacto||'')}</div></td><td class="num">${esc(c.celular||'—')}</td>
+      <td><div class="s" style="color:var(--fg)">${esc(c.correo||'—')}</div></td><td>${esc(c.ciudad||'—')}</td><td>${esc(c.nicho||'—')}</td><td>${estadoPill(c.estado)}</td>
+      <td class="r num">${c.st.ent||'—'}</td><td class="r num">${c.st.pro?`<span class="pill cyan">${c.st.pro}</span>`:'—'}</td><td class="num">${c.st.ult?fdate(c.st.ult):'—'}</td></tr>`).join('')}
+    </tbody></table>${!rows.length?`<div class="empty">Ningún cliente coincide con la búsqueda.</div>`:''}${rows.length>400?`<div class="more">Mostrando 400 de ${rows.length}. Usa la búsqueda para el resto.</div>`:''}</div>`;
+}
+
+/* ---------- PROVEEDORES ---------- */
+function vProveedores(){
+  if (!ready('proveedores','proyectos')) return waiting();
+  const q = norm(F.prov.q), P = list('proyectos');
+  const rows = list('proveedores').filter(p => !q || norm([p.nombre,p.contacto,p.celular,p.servicio].join(' ')).includes(q))
+    .map(p => ({...p, n:P.filter(x=>(x.proveedores||[]).includes(p.id)).length, ab:P.filter(x=>(x.proveedores||[]).includes(p.id) && ABIERTOS.includes(x.estado)).length}))
+    .sort((a,b)=> (b.activo!==false) - (a.activo!==false) || b.n-a.n);
+  return `<div class="toolbar"><input class="search" id="provQ" type="search" placeholder="Buscar proveedor, contacto o servicio…" value="${esc(F.prov.q)}" data-f="prov.q"></div>
+    <div class="tablewrap"><table><thead><tr><th>Proveedor</th><th>Contacto</th><th>Celular</th><th>Qué hace</th><th class="r">En proceso</th><th class="r">Trabajos</th></tr></thead><tbody>
+    ${rows.map(p => `<tr data-act="verProveedor" data-id="${esc(p.id)}"><td><div class="t">${esc(p.nombre)}</div>${p.activo===false?'<div class="s">Inactivo</div>':''}</td><td>${esc(p.contacto||'—')}</td><td class="num">${esc(p.celular||'—')}</td><td>${esc(p.servicio||'—')}</td>
+      <td class="r num">${p.ab?`<span class="pill cyan">${p.ab}</span>`:'—'}</td><td class="r num">${p.n||'—'}</td></tr>`).join('')}
+    </tbody></table>${!rows.length?`<div class="empty">No hay proveedores. Crea el primero con “+ Nuevo proveedor”.</div>`:''}</div>`;
+}
+const PROV_FIELDS = [
+  {k:'nombre',l:'Nombre del proveedor',req:true},{k:'contacto',l:'Persona de contacto'},{k:'celular',l:'Celular',t:'tel'},
+  {k:'servicio',l:'Qué hace (impresión, corte láser, avisos…)'},{k:'notas',l:'Notas',t:'area',w:'w2'},{k:'activo',l:'Proveedor activo',t:'check'},
+];
+
+/* ============================================================
+   FORMULARIOS Y DIÁLOGO
+   ============================================================ */
+function fieldHTML(f, v){
+  if (f.sec) return `<div class="sec">${esc(f.sec)}</div>`;
+  const id = 'f_'+f.k, req = f.req ? 'required' : '';
+  let input;
+  switch (f.t) {
+    case 'select': input = `<select id="${id}">${opt(f.o, v)}</select>`; break;
+    case 'area': input = `<textarea id="${id}">${esc(v)}</textarea>`; break;
+    case 'combo': input = `<input id="${id}" list="${f.list}" value="${esc(v)}" ${req} autocomplete="off">`; break;
+    case 'date': input = `<input id="${id}" type="date" value="${esc(v)}" ${req}>`; break;
+    case 'money': case 'number': input = `<input id="${id}" type="number" step="any" inputmode="decimal" value="${v ?? ''}">`; break;
+    case 'check': return `<label class="fld w2" style="display:flex;gap:8px;align-items:center"><input id="${id}" type="checkbox" ${v!==false?'checked':''}><span>${esc(f.l)}</span></label>`;
+    case 'provs': return provsHTML(v||[]);
+    default: input = `<input id="${id}" type="${f.t||'text'}" value="${esc(v)}" ${req}>`;
+  }
+  return `<label class="fld ${f.w||''}"><span>${esc(f.l)}${f.req?' *':''}</span>${input}</label>`;
+}
+function provsHTML(sel){
+  const ps = list('proveedores').filter(p => p.activo!==false || sel.includes(p.id)).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
+  return `<div class="fld w2"><span>Proveedores del trabajo (puedes elegir varios)</span><div class="chips" id="provChips">
+    ${ps.map(p => `<label class="chip"><input type="checkbox" value="${esc(p.id)}" ${sel.includes(p.id)?'checked':''}>${esc(p.nombre)}</label>`).join('')}</div>
+    <div class="addrow"><input id="newProvName" placeholder="¿No está? Escribe el nombre del proveedor nuevo"><input id="newProvTel" placeholder="Celular (opcional)" style="flex:0 1 170px"><button type="button" class="btn sm" data-act="addProv">+ Crear proveedor</button></div></div>`;
+}
+function readFields(fields){
+  const o = {};
+  for (const f of fields) {
+    if (f.sec) continue;
+    if (f.t === 'provs') { o.proveedores = [...document.querySelectorAll('#provChips input:checked')].map(i => i.value); continue; }
+    const el = document.getElementById('f_'+f.k); if (!el) continue;
+    if (f.t === 'check') o[f.k] = el.checked;
+    else if (f.t === 'money' || f.t === 'number') o[f.k] = el.value === '' ? null : Number(el.value);
+    else o[f.k] = el.value.trim();
+  }
+  return o;
+}
+function missing(fields){
+  for (const f of fields) if (f.req) { const el = document.getElementById('f_'+f.k); if (el && !el.value.trim()) { el.focus(); toast(`Falta: ${f.l}`); return true; } }
+  return false;
+}
+const dlg = $('#dlg');
+function openDlg(title, body, foot){
+  $('#dlgTitle').textContent = title; $('#dlgBody').innerHTML = body; $('#dlgFoot').innerHTML = foot;
+  if (!dlg.open) { try { dlg.showModal(); } catch { dlg.setAttribute('open',''); } }
+  $('#dlgBody').scrollTop = 0;
+}
+function closeDlg(){ try { dlg.close(); } catch { dlg.removeAttribute('open'); } dlgCtx = null; }
+$('#dlgX').onclick = closeDlg;
+dlg.addEventListener('click', e => { if (e.target === dlg) closeDlg(); });
+let dlgCtx = null;
+const foot = (canDelete) => `${canDelete?'<button class="btn danger sp" data-act="dlgBorrar">Eliminar</button>':'<span class="sp"></span>'}<button class="btn" data-act="dlgCerrar">Cancelar</button><button class="btn primary" data-act="dlgGuardar">Guardar</button>`;
+
+function openCliente(id, preset={}){
+  const c = id ? {...S.clientes.get(id)} : {estado:'Nuevo', responsable:yo(), fechaContacto:today(), ...preset};
+  dlgCtx = {col:'clientes', id, fields:CLI_FIELDS, doc:c};
+  let extra = '';
+  if (id) {
+    const ps = proyectosDe(id).sort((a,b)=>(b.fechaEntrega||'').localeCompare(a.fechaEntrega||''));
+    const cots = list('cotizaciones').filter(x => x.clienteId === id);
+    const ent = ps.filter(p=>p.estado==='Finalizado').length, pro = ps.filter(p=>ABIERTOS.includes(p.estado)).length;
+    extra = `<div><h3 style="font-size:16px;margin-bottom:8px">Trabajos</h3><div class="minis"><span class="pill ok">${ent} entregados</span><span class="pill cyan">${pro} en proceso</span><span class="pill">${cots.length} cotizaciones</span>
+        <button class="btn sm" data-act="trabajoParaCliente">+ Nuevo trabajo</button>${ps.length?`<button class="btn sm" data-act="verTrabajosCliente">Ver en Producción</button>`:''}</div>
+      <div class="rows">${ps.slice(0,6).map(p=>`<div class="row" data-act="verProyecto" data-id="${esc(p.id)}"><div class="main"><div class="t">${esc(p.nombre)}</div><div class="s">${esc(p.oc||'')} ${p.oc?'·':''} ${fdate(p.fechaEntrega)}</div></div>${estadoPill(p.estado)}</div>`).join('')}</div></div>
+      <div><h3 style="font-size:16px;margin-bottom:8px">Bitácora de gestiones</h3>
+        <div class="addrow" style="margin:0 0 10px"><input id="logTxt" placeholder="Ej.: Llamé, pidió propuesta para el viernes"><button class="btn sm primary" data-act="addLog">Anotar</button></div>
+        <div class="log" id="logList">${logHTML(c.bitacora)}</div></div>`;
+  }
+  openDlg(id ? c.empresa : 'Nuevo cliente', extra + `<div class="form">${CLI_FIELDS.map(f => fieldHTML(f, c[f.k])).join('')}</div>`, foot(!!id));
+}
+function logHTML(b){ b = (b||[]).slice().reverse(); return b.length ? b.map(x => `<div class="it">${esc(x.texto)}<small>${x.fecha?fdate(x.fecha):'Desde el Excel'}${x.por?' · '+esc(x.por):''}</small></div>`).join('') : '<div class="s" style="color:var(--muted)">Sin anotaciones todavía.</div>'; }
+
+function openProyecto(id, preset={}){
+  const p = id ? {...S.proyectos.get(id)} : {estado:'Por comenzar', fechaInicio:today(), proveedores:[], facturado:'NO', ...preset};
+  if (!p) return;
+  dlgCtx = {col:'proyectos', id, fields:PROY_FIELDS, doc:p};
+  openDlg(id ? p.nombre : 'Nuevo trabajo', `<div class="form">${PROY_FIELDS.map(f => fieldHTML(f, p[f.k])).join('')}</div>`, foot(!!id));
+}
+function openGasto(id){
+  const g = id ? {...S.gastos.get(id)} : {fecha:today(), comercial:yo()};
+  dlgCtx = {col:'gastos', id, fields:GAS_FIELDS, doc:g};
+  openDlg(id ? `Gasto del ${fdate(g.fecha)}` : 'Registrar gasto de salida', `<div class="form">${GAS_FIELDS.map(f => fieldHTML(f, g[f.k])).join('')}<div class="fld w2"><span>Total</span><b id="gasTotal" class="num" style="font-size:20px;font-family:var(--f-display)">${money(gTotal(g))}</b></div></div>`, foot(!!id));
+}
+const gTotal = g => ['gasolina','peajes','parqueadero','almuerzo','varios'].reduce((t,k)=>t+(+g[k]||0),0);
+function openProveedor(id){
+  const p = id ? {...S.proveedores.get(id)} : {activo:true};
+  dlgCtx = {col:'proveedores', id, fields:PROV_FIELDS, doc:p};
+  let extra = '';
+  if (id) {
+    const ps = list('proyectos').filter(x=>(x.proveedores||[]).includes(id)).sort((a,b)=>(b.fechaEntrega||'').localeCompare(a.fechaEntrega||''));
+    extra = `<div><div class="minis"><span class="pill cyan">${ps.filter(x=>ABIERTOS.includes(x.estado)).length} en proceso</span><span class="pill ok">${ps.filter(x=>x.estado==='Finalizado').length} entregados</span></div>
+      <div class="rows">${ps.slice(0,6).map(x=>`<div class="row" data-act="verProyecto" data-id="${esc(x.id)}"><div class="main"><div class="t">${esc(x.nombre)}</div><div class="s">${esc(x.clienteNombre)} · ${fdate(x.fechaEntrega)}</div></div>${estadoPill(x.estado)}</div>`).join('')}</div></div>`;
+  }
+  openDlg(id ? p.nombre : 'Nuevo proveedor', extra + `<div class="form">${PROV_FIELDS.map(f => fieldHTML(f, p[f.k])).join('')}</div>`, foot(!!id));
+}
+
+async function dlgGuardar(btn){
+  const c = dlgCtx; if (!c) return;
+  if (missing(c.fields)) return;
+  const data = {...c.doc, ...readFields(c.fields)};
+  delete data.id;
+  btn.disabled = true;
+  if (c.col === 'proyectos') {
+    const cli = await asegurarCliente(data.clienteNombre, {contacto:data.contacto||''});
+    data.clienteId = cli.id; data.clienteNombre = cli.empresa || data.clienteNombre;
+  }
+  if (c.col === 'gastos') data.total = gTotal(data);
+  if (c.col === 'clientes' && !data.bitacora) data.bitacora = [];
+  const id = c.id || uid();
+  const ok = await save(c.col, id, data);
+  btn.disabled = false;
+  if (ok) { toast('Guardado'); closeDlg(); }
+}
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+document.addEventListener('click', async e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  if (a.tagName === 'SELECT') return;
+  const act = a.dataset.act, id = a.dataset.id;
+  switch (act) {
+    case 'nav': go(a.dataset.v); break;
+    case 'vista': F.cli.vista = a.dataset.v; saveF(); render(); break;
+    case 'grupo': F.prod.grupo = a.dataset.v; saveF(); render(); break;
+    case 'limpiarProd': Object.assign(F.prod, {q:'',cliente:'',prov:'',mes:'',fact:''}); saveF(); render(); break;
+    case 'gasTodo': F.gas.mes = F.gas.mes ? '' : today().slice(0,7); saveF(); render(); break;
+    case 'importar': $('#impFile').click(); break;
+    case 'salir': firebase.auth().signOut(); break;
+    case 'nuevoCliente': openCliente(null); break;
+    case 'nuevoClienteDir': openCliente(null, {estado:'Ganado', origen:'Cliente antiguo'}); break;
+    case 'dirTipo': F.dir.tipo = a.dataset.v; saveF(); render(); break;
+    case 'verCliente': openCliente(id); break;
+    case 'nuevoProyecto': openProyecto(null); break;
+    case 'verProyecto': if (S.proyectos.get(id)) openProyecto(id); break;
+    case 'nuevoGasto': openGasto(null); break;
+    case 'verGasto': openGasto(id); break;
+    case 'nuevoProveedor': openProveedor(null); break;
+    case 'verProveedor': openProveedor(id); break;
+    case 'dlgCerrar': closeDlg(); break;
+    case 'dlgGuardar': dlgGuardar(a); break;
+    case 'dlgBorrar':
+      if (!a.classList.contains('armed')) { a.classList.add('armed'); a.textContent = 'Toca otra vez para eliminar'; setTimeout(()=>{ a.classList.remove('armed'); a.textContent='Eliminar'; }, 4000); break; }
+      if (dlgCtx?.id && await remove(dlgCtx.col, dlgCtx.id)) { toast('Eliminado'); closeDlg(); }
+      break;
+    case 'trabajoParaCliente': { const c = dlgCtx.doc; openProyecto(null, {clienteNombre:c.empresa, contacto:c.contacto||'', recibe:c.contacto||''}); break; }
+    case 'verTrabajosCliente': { const cid = dlgCtx.id; closeDlg(); Object.assign(F.prod, {cliente:cid, grupo:'todos', q:'', prov:'', mes:'', fact:''}); saveF(); go('produccion'); break; }
+    case 'addLog': {
+      const t = $('#logTxt').value.trim(); if (!t || !dlgCtx?.id) return;
+      const b = [...(S.clientes.get(dlgCtx.id)?.bitacora || []), {fecha:today(), texto:t, por:yo()}];
+      if (await patch('clientes', dlgCtx.id, {bitacora:b, ultimaGestion:today()})) { $('#logTxt').value=''; $('#logList').innerHTML = logHTML(b); dlgCtx.doc.bitacora = b; const u = $('#f_ultimaGestion'); if (u) u.value = today(); }
+      break;
+    }
+    case 'addProv': {
+      const n = $('#newProvName').value.trim(); if (!n) { $('#newProvName').focus(); return; }
+      const ex = list('proveedores').find(p => norm(p.nombre) === norm(n));
+      const pid = ex ? ex.id : uid();
+      if (!ex && !(await save('proveedores', pid, {nombre:n, contacto:'', celular:$('#newProvTel').value.trim(), servicio:'', notas:'', activo:true}))) return;
+      const sel = [...document.querySelectorAll('#provChips input:checked')].map(i=>i.value); if (!sel.includes(pid)) sel.push(pid);
+      setTimeout(() => { const wrap = $('#provChips')?.closest('.fld'); if (wrap) wrap.outerHTML = provsHTML(sel); }, 300);
+      toast(ex ? 'Ese proveedor ya existía: quedó seleccionado' : 'Proveedor creado y seleccionado');
+      break;
+    }
+    case 'nuevaCot': cotDraft = cotNueva(); F.cot.sel=''; saveF(); render(); break;
+    case 'abrirCot': cotDraft = {id, ...S.cotizaciones.get(id)}; F.cot.sel = id; saveF(); render(); break;
+    case 'guardarCot': case 'cotAProyecto': {
+      const d = {...cotDraft}; if (!d.trabajo) { $('#cot_trabajo')?.focus(); toast('Ponle nombre al trabajo'); return; }
+      a.disabled = true;
+      const cli = d.clienteNombre ? await asegurarCliente(d.clienteNombre, {estado:'Propuesta enviada'}) : {id:'',empresa:''};
+      d.clienteId = cli.id; d.clienteNombre = cli.empresa || d.clienteNombre;
+      const cid = d.id || uid(); delete d.id;
+      if (act === 'cotAProyecto') {
+        const pid = uid(), r = calc(d);
+        const ok = await save('proyectos', pid, {nombre:d.trabajo, clienteId:d.clienteId, clienteNombre:d.clienteNombre, contacto:'', estado:'Por comenzar', fechaInicio:today(), fechaEntrega:'', facturado:'NO', oc:'', factura:'', valor:Math.round(r.antesIva), proveedores:[], entrega:'', recibe:'', direccion:'', notas:`Desde cotización del ${fdate(d.fecha)} · ${d.cantidad} u. · total con IVA ${money(r.total)}`});
+        if (ok) { d.proyectoId = pid; d.estado = 'Aceptada'; }
+      }
+      if (await save('cotizaciones', cid, d)) { cotDraft = {id:cid, ...d}; F.cot.sel = cid; saveF(); toast(act === 'cotAProyecto' ? 'Trabajo creado en Producción' : 'Cotización guardada'); render(); }
+      a.disabled = false; break;
+    }
+    case 'borrarCot':
+      if (!a.classList.contains('armed')) { a.classList.add('armed'); a.textContent = 'Toca otra vez para eliminar'; setTimeout(()=>{ a.classList.remove('armed'); a.textContent='Eliminar'; }, 4000); break; }
+      if (cotDraft?.id && await remove('cotizaciones', cotDraft.id)) { cotDraft = cotNueva(); F.cot.sel=''; saveF(); toast('Cotización eliminada'); render(); }
+      break;
+  }
+});
+// filtros y selects en línea
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.f) { const [m,k] = el.dataset.f.split('.'); F[m][k] = el.value; saveF(); if (el.tagName !== 'SELECT' && el.type !== 'month') debRender(); else render(); return; }
+  if (el.dataset.cot) {
+    const k = el.dataset.cot, v = el.value;
+    if (k === 'utilidadPct') cotDraft.utilidad = (+v||0)/100; else if (k === 'ivaPct') cotDraft.iva = (+v||0)/100;
+    else cotDraft[k] = ['cantidad','costoProveedor','envio','parqueadero','otros','comision'].includes(k) ? (v===''?0:+v) : v;
+    $('#cotRes').innerHTML = cotResultado(cotDraft); return;
+  }
+  if (dlgCtx?.col === 'gastos' && $('#gasTotal')) { const g = readFields(GAS_FIELDS); $('#gasTotal').textContent = money(gTotal(g)); }
+});
+document.addEventListener('change', async e => {
+  const el = e.target;
+  if (el.dataset.act === 'estadoProd') { const ok = await patch('proyectos', el.dataset.id, {estado:el.value}); if (ok) toast(`Estado: ${el.value}`); }
+});
+// arrastrar tarjetas del tablero entre estados
+document.addEventListener('dragstart', e => { const c = e.target.closest?.('.card[draggable]'); if (c) { e.dataTransfer.setData('text/plain', c.dataset.id); e.dataTransfer.effectAllowed='move'; } });
+document.addEventListener('dragover', e => { const col = e.target.closest?.('[data-drop]'); if (col) { e.preventDefault(); col.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const col = e.target.closest?.('[data-drop]'); if (col && !col.contains(e.relatedTarget)) col.classList.remove('over'); });
+document.addEventListener('drop', async e => {
+  const col = e.target.closest?.('[data-drop]'); if (!col) return; e.preventDefault(); col.classList.remove('over');
+  const id = e.dataTransfer.getData('text/plain'), est = col.dataset.drop; const c = S.clientes.get(id);
+  if (c && c.estado !== est) { const ok = await patch('clientes', id, {estado:est, ...(est==='Ganado'&&!c.fechaCierre?{fechaCierre:today()}:{})}); if (ok) toast(`${c.empresa} → ${est}`); }
+});
+['yo','yo2'].forEach(i => $('#'+i).addEventListener('change', e => { $('#yo').value = $('#yo2').value = e.target.value; ls.set('yo', e.target.value); }));
+$('#yo').value = $('#yo2').value = ls.get('yo','Steven');
+
+/* ============================================================
+   RENDER Y NAVEGACIÓN
+   ============================================================ */
+function go(id){ if (!MODULES.find(m=>m.id===id)) id = 'inicio'; current = id; if (location.hash !== '#'+id) history.replaceState(null,'','#'+id); render(); window.scrollTo(0,0); }
+let rq = 0, dt = 0;
+function scheduleRender(){ if (rq) return; rq = requestAnimationFrame(() => { rq = 0; render(); }); }
+function debRender(){ clearTimeout(dt); dt = setTimeout(render, 160); }
+function updateLists(){
+  const empresas = list('clientes').map(c => c.empresa).filter(Boolean).sort((a,b)=>a.localeCompare(b,'es'));
+  const nichos = [...new Set([...L.nichos, ...list('clientes').map(c=>c.nicho).filter(Boolean)])];
+  const entrega = [...new Set(['Steven','Vanessa','Domicilio','Proveedor directo', ...list('proveedores').map(p=>p.nombre)])];
+  $('#lists').innerHTML = `<datalist id="dl-clientes">${empresas.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+    <datalist id="dl-nichos">${nichos.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+    <datalist id="dl-entrega">${entrega.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`;
+}
+function render(){
+  const m = MODULES.find(x => x.id === current);
+  $('#navItems').innerHTML = MODULES.map(x => `<button class="navbtn" data-act="nav" data-v="${x.id}" ${x.id===current?'aria-current="page"':''}>${ICON[x.id]||''}<span class="lbl">${esc(x.label)}</span><span class="lbl-short">${esc(x.short)}</span></button>`).join('');
+  $('#title').textContent = m.label;
+  $('#actions').innerHTML = m.action ? m.action() : '';
+  $('#banner').innerHTML = dbState === 'slow' ? `<div class="banner">La información está tardando en cargar. Revisa tu conexión; la app sigue intentando.</div>` : dbState === 'error' ? `<div class="banner">Se perdió la conexión con la base de datos. Recarga la página.</div>` : '';
+  const a = document.activeElement, view = $('#view');
+  const fid = a && a.id && view.contains(a) ? a.id : null; let ss, se; try { ss = a.selectionStart; se = a.selectionEnd; } catch {}
+  view.innerHTML = m.render();
+  if (fid) { const n = document.getElementById(fid); if (n) { n.focus(); try { if (ss != null) n.setSelectionRange(ss, se); } catch {} } }
+  updateLists();
+}
+window.addEventListener('hashchange', () => go(location.hash.slice(1)));
+
+let unsubs = [];
+async function importar(file){
+  let data;
+  try { data = JSON.parse(await file.text()); } catch { toast('Ese archivo no es un respaldo válido.'); return; }
+  const cols = COLS.filter(c => data[c] && typeof data[c] === 'object');
+  if (!cols.length) { toast('El archivo no tiene datos de Display.'); return; }
+  const docs = []; cols.forEach(c => Object.entries(data[c]).forEach(([id, d]) => docs.push([c, id, d])));
+  toast(`Importando ${docs.length} registros…`);
+  try {
+    for (let i = 0; i < docs.length; i += 400) {
+      const b = db.batch();
+      docs.slice(i, i + 400).forEach(([c, id, d]) => b.set(db.collection(c).doc(id), d));
+      await b.commit();
+    }
+    toast(`Listo: ${docs.length} registros importados.`);
+  } catch (e) { toast(errMsg(e)); }
+}
+function suscribir(){
+  const slow = setTimeout(() => { if (loaded.size < COLS.length) { dbState = 'slow'; render(); } }, 10000);
+  unsubs = COLS.map(c => db.collection(c).onSnapshot(snap => {
+    S[c] = new Map(snap.docs.map(d => [d.id, d.data()]));
+    if (!snap.metadata.fromCache) loaded.add(c);
+    if (loaded.size === COLS.length) { clearTimeout(slow); if (dbState === 'slow' || dbState === 'connecting') dbState = 'ok'; }
+    if (c === 'cotizaciones' && cotDraft?.id && !S.cotizaciones.has(cotDraft.id)) cotDraft = null;
+    scheduleRender();
+  }, err => { clearTimeout(slow); dbState = 'error'; COLS.forEach(x => loaded.add(x)); scheduleRender(); }));
+}
+function authMsg(e){
+  const c = e && e.code || '';
+  if (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found') || c.includes('invalid-email')) return 'Correo o contraseña incorrectos.';
+  if (c.includes('too-many-requests')) return 'Demasiados intentos. Espera unos minutos.';
+  if (c.includes('network')) return 'Sin conexión a internet.';
+  return 'No se pudo entrar. Inténtalo de nuevo.';
+}
+function boot(){
+  current = MODULES.find(m => '#'+m.id === location.hash)?.id || 'inicio';
+  render();
+  const cfg = window.FIREBASE_CONFIG;
+  if (!window.firebase || !cfg || !cfg.apiKey || cfg.apiKey.startsWith('PEGAR')) { dbState = 'none'; render(); return; }
+  firebase.initializeApp(cfg);
+  const auth = firebase.auth();
+  db = firebase.firestore();
+  $('#impFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importar(f); });
+  $('#loginForm').addEventListener('submit', async e => {
+    e.preventDefault(); $('#lgErr').textContent = ''; $('#lgBtn').disabled = true;
+    try { await auth.signInWithEmailAndPassword($('#lgEmail').value.trim(), $('#lgPass').value); }
+    catch (err) { $('#lgErr').textContent = authMsg(err); }
+    $('#lgBtn').disabled = false;
+  });
+  $('#lgReset').addEventListener('click', async () => {
+    const em = $('#lgEmail').value.trim();
+    if (!em) { $('#lgErr').textContent = 'Escribe tu correo y vuelve a tocar "Olvidé mi contraseña".'; return; }
+    try { await auth.sendPasswordResetEmail(em); $('#lgErr').textContent = 'Te enviamos un correo para cambiar la contraseña.'; }
+    catch (err) { $('#lgErr').textContent = authMsg(err); }
+  });
+  auth.onAuthStateChanged(user => {
+    unsubs.forEach(u => u()); unsubs = []; loaded.clear(); COLS.forEach(c => S[c] = new Map());
+    if (!user) { $('#login').hidden = false; $('#lgPass').value = ''; dbState = 'connecting'; render(); return; }
+    $('#login').hidden = true;
+    $('#whoami').textContent = user.email;
+    const nombre = (window.DISPLAY_USUARIOS || {})[String(user.email).toLowerCase()];
+    if (nombre && !ls.get('yo', null)) { $('#yo').value = $('#yo2').value = nombre; }
+    dbState = 'connecting'; suscribir(); render();
+  });
+}
+boot();
+</script>
+
+</body>
+</html>
