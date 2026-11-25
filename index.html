@@ -400,6 +400,7 @@ const ready = (...cols) => cols.every(c => loaded.has(c));
 /* ---------- INICIO ---------- */
 function vInicio(){
   if (!ready('clientes','proyectos','gastos')) return waiting();
+  if (dbState === 'error') return waiting();
   if (!S.clientes.size && !S.proyectos.size) return `<div class="panel empty" style="display:grid;gap:12px;justify-items:center"><b>La base de datos está vacía.</b><span>Carga el respaldo con toda la información (archivo respaldo-display-….json).</span><button class="btn primary" data-act="importar">Importar respaldo</button></div>`;
   const t = today(), semana = addDays(t,7), mes = t.slice(0,7);
   const P = list('proyectos'), C = list('clientes'), G = list('gastos');
@@ -925,7 +926,7 @@ function render(){
   $('#navItems').innerHTML = MODULES.map(x => `<button class="navbtn" data-act="nav" data-v="${x.id}" ${x.id===current?'aria-current="page"':''}>${ICON[x.id]||''}<span class="lbl">${esc(x.label)}</span><span class="lbl-short">${esc(x.short)}</span></button>`).join('');
   $('#title').textContent = m.label;
   $('#actions').innerHTML = m.action ? m.action() : '';
-  $('#banner').innerHTML = dbState === 'slow' ? `<div class="banner">La información está tardando en cargar. Revisa tu conexión; la app sigue intentando.</div>` : dbState === 'error' ? `<div class="banner">Se perdió la conexión con la base de datos. Recarga la página.</div>` : '';
+  $('#banner').innerHTML = dbState === 'slow' ? `<div class="banner">La información está tardando en cargar. Revisa tu conexión; la app sigue intentando.</div>` : dbState === 'error' ? `<div class="banner">${dbErr === 'permission-denied' ? 'Firebase no deja leer los datos: revisa que las reglas publicadas tengan el correo equipo@display-central-d2686.firebaseapp.com.' : 'Se perdió la conexión con la base de datos. Recarga la página.'} <small>(${esc(dbErr || 'sin código')})</small></div>` : '';
   const a = document.activeElement, view = $('#view');
   const fid = a && a.id && view.contains(a) ? a.id : null; let ss, se; try { ss = a.selectionStart; se = a.selectionEnd; } catch {}
   view.innerHTML = m.render();
@@ -934,7 +935,7 @@ function render(){
 }
 window.addEventListener('hashchange', () => go(location.hash.slice(1)));
 
-let unsubs = [];
+let unsubs = [], dbErr = '';
 async function importar(file){
   let data;
   try { data = JSON.parse(await file.text()); } catch { toast('Ese archivo no es un respaldo válido.'); return; }
@@ -959,7 +960,7 @@ function suscribir(){
     if (loaded.size === COLS.length) { clearTimeout(slow); if (dbState === 'slow' || dbState === 'connecting') dbState = 'ok'; }
     if (c === 'cotizaciones' && cotDraft?.id && !S.cotizaciones.has(cotDraft.id)) cotDraft = null;
     scheduleRender();
-  }, err => { clearTimeout(slow); dbState = 'error'; COLS.forEach(x => loaded.add(x)); scheduleRender(); }));
+  }, err => { clearTimeout(slow); dbState = 'error'; dbErr = (err && err.code) || ''; console.error('Firestore', c, err); COLS.forEach(x => loaded.add(x)); scheduleRender(); }));
 }
 function authMsg(e){
   const c = e && e.code || '';
